@@ -1,4 +1,4 @@
-# Random_number_LINEbot
+# Random-number-LINEbot
 最小値と最大値を設定したら乱数を生成してくれるLINEbot「乱数生成くん」を作成。
 
 ## 未完成部分  

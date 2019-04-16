@@ -1,0 +1,2 @@
+# Random_number_LINEbot
+最小値と最大値を設定したら乱数を生成してくれるLINEbot

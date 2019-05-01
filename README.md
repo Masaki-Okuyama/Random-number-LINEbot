@@ -26,5 +26,5 @@ FlagTB (
 
 ## 乱数生成くんのLINEID
 IDは`@yij5612k`  
-QRは  
+QRコードは  
 ![qr](https://github.com/Masaki-Okuyama/Random-number-LINEbot/blob/images/randomku_qr.jpg)

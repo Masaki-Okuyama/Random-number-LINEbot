@@ -72,7 +72,7 @@ def handle_message(event):
                 ))
 
         elif '乱数' in event.message.text:
-            cur.execute("UPDATE FlagTB SET minFlag=TRUE,stampNum=0 WHERE userID='%s';" % user_id)
+            # cur.execute("UPDATE FlagTB SET minFlag=TRUE,stampNum=0 WHERE userID='%s';" % user_id)
             cur.execute("SELECT * FROM FlagTB WHERE userID='qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';")
             misres = cur.fetchall()
             line_bot_api.reply_message(
@@ -80,7 +80,7 @@ def handle_message(event):
                 (
                     TextSendMessage('お、乱数の生成だな'),
                     TextSendMessage(str(misres)),
-                    TextSendMessage(type(str(misres))),
+                    TextSendMessage(str(type(misres))),
                     TextSendMessage('最小値は何にすんだ?')
                 ))
         elif result[0][1]:

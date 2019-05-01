@@ -80,8 +80,7 @@ def handle_message(event):
                 (
                     TextSendMessage('お、乱数の生成だな'),
                     TextSendMessage(str(misres)),
-                    TextSendMessage(str(misres[0])),
-                    TextSendMessage(str(misres[0][0])),
+                    TextSendMessage(type(str(misres))),
                     TextSendMessage('最小値は何にすんだ?')
                 ))
         elif result[0][1]:

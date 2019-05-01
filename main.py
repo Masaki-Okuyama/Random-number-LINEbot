@@ -57,7 +57,7 @@ def handle_message(event):
         # データベースに登録されているユーザーならここに入る
         if '乱数' in event.message.text or 'リセット' in event.message.text:
             if '乱数' in event.message.text and result[0][1]:
-                # min_flagがオンのとき
+                # min_flagがオンのときに'乱数'
                 cur.execute("UPDATE FlagTB SET maxFlag=FALSE,randFlag=FALSE,stampNum=0 WHERE userID='%s';" % user_id)
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -67,6 +67,7 @@ def handle_message(event):
                     ))
 
             elif '乱数' in event.message.text:
+                # なにもなしに'乱数'
                 cur.execute("UPDATE FlagTB SET minFlag=TRUE,stampNum=0 WHERE userID='%s';" % user_id)
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -93,6 +94,7 @@ def handle_message(event):
                         TextSendMessage('ってまだ何も設定してねぇじゃねぇか!')
                     ))
         else:
+            # '乱数'と'リセット'以外の言葉ならこっちに
             if result[0][3]:
                 # rand_flagがオンのとき
                 line_bot_api.reply_message(
@@ -101,6 +103,7 @@ def handle_message(event):
             elif result[0][2]:
                 # max_flagがオンのとき
                 if event.message.text.isdecimal():
+                    # 自然数ならここ
                     max_number = int(event.message.text)
                     min_number = result[0][5]
                     min_number, max_number = min(min_number, max_number), max(min_number, max_number)
@@ -119,6 +122,7 @@ def handle_message(event):
             elif result[0][1]:
                 # min_flagがオンのとき
                 if event.message.text.isdecimal():
+                    # 自然数ならここ
                     min_number = int(event.message.text)
                     cur.execute("UPDATE FlagTB SET maxFlag=TRUE,minNumber=%d,stampNum=0 WHERE userID='%s';" % (min_number, user_id))
                     line_bot_api.reply_message(
@@ -137,26 +141,27 @@ def handle_message(event):
                     TextSendMessage('ちょっと"乱数"って言ってみねぇか?'))
     else:
         # データベースの中にないユーザーは追加する
-        cur.execute("INSERT INTO FlagTB VALUES ('%s',FALSE,FALSE,FALSE,-1,-1,0);" % user_id)
         if '乱数' in event.message.text:
-            cur.execute("UPDATE FlagTB SET minFlag=TRUE,stampNum=0 WHERE userID='%s';" % user_id)
+            cur.execute("INSERT INTO FlagTB VALUES ('%s',TRUE,FALSE,FALSE,-1,-1,0);" % user_id)
             line_bot_api.reply_message(
                 event.reply_token,
                 (
                     TextSendMessage('お、乱数の生成だな'),
-                    TextSendMessage('最小値は何にすんだ?')
+                    TextSendMessage('最小値は何にすんだ?zero')
                 ))
         if 'リセット' in event.message.text:
+            cur.execute("INSERT INTO FlagTB VALUES ('%s',FALSE,FALSE,FALSE,-1,-1,0);" % user_id)
             line_bot_api.reply_message(
                 event.reply_token,
                 (
                     TextSendMessage('リセットするのか'),
-                    TextSendMessage('ってまだ何も設定してねぇじゃねぇか!')
+                    TextSendMessage('ってまだ何も設定してねぇじゃねぇか!zero')
                 ))
         else:
+            cur.execute("INSERT INTO FlagTB VALUES ('%s',FALSE,FALSE,FALSE,-1,-1,0);" % user_id)
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage('ちょっと"乱数"って言ってみねぇか?'))
+                TextSendMessage('ちょっと"乱数"って言ってみねぇか?zero'))
 
 
 # スタンプが来たとき
@@ -167,56 +172,65 @@ def handle_sticker(event):
     user_id = str(event.source.user_id)
     cur.execute("SELECT * FROM FlagTB WHERE userID='%s';" % user_id)
     result = cur.fetchall()
-    if result[0][3]:
-        # rand_flagがオンのとき
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(np.random.randint(result[0][5], result[0][4] + 1)))
-    elif result[0][2]:
-        # max_flagがオンのとき
-        stamp_num = result[0][6]
-        stamp_num += 1
-        cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
-        if stamp_num > 10:
-            line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('%d回もスタンプばっか送りやがって...' % stamp_num),
-                TextSendMessage('早く最大値を教えねぇか!!!')
-            ))
+    if result:
+        # データベースに登録されているユーザーならここに入る
+        if result[0][3]:
+            # rand_flagがオンのとき
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(np.random.randint(result[0][5], result[0][4] + 1)))
+        elif result[0][2]:
+            # max_flagがオンのとき
+            stamp_num = result[0][6]
+            stamp_num += 1
+            cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
+            if stamp_num > 10:
+                line_bot_api.reply_message(event.reply_token, (
+                    TextSendMessage('%d回もスタンプばっか送りやがって...' % stamp_num),
+                    TextSendMessage('早く最大値を教えねぇか!!!')
+                ))
+            else:
+                line_bot_api.reply_message(event.reply_token, (
+                    TextSendMessage('いいスタンプだなぁ'),
+                    TextSendMessage('でも今は最大値を教えてくれ')
+                ))
+        elif result[0][1]:
+            # min_flagがオンのとき
+            stamp_num = result[0][6]
+            stamp_num += 1
+            cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
+            if stamp_num > 10:
+                line_bot_api.reply_message(event.reply_token, (
+                    TextSendMessage('%d回もスタンプばっか送りやがって...' % stamp_num),
+                    TextSendMessage('早く最小値を教えねぇか!!!')
+                ))
+            else:
+                line_bot_api.reply_message(event.reply_token, (
+                    TextSendMessage('いいスタンプだなぁ'),
+                    TextSendMessage('でも今は最小値を教えてくれ')
+                ))
         else:
-            line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('いいスタンプだなぁ'),
-                TextSendMessage('でも今は最大値を教えてくれ')
-            ))
-    elif result[0][1]:
-        # min_flagがオンのとき
-        stamp_num = result[0][6]
-        stamp_num += 1
-        cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
-        if stamp_num > 10:
-            line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('%d回もスタンプばっか送りやがって...' % stamp_num),
-                TextSendMessage('早く最小値を教えねぇか!!!')
-            ))
-        else:
-            line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('いいスタンプだなぁ'),
-                TextSendMessage('でも今は最小値を教えてくれ')
-            ))
+            stamp_num = result[0][6]
+            stamp_num += 1
+            cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
+            if stamp_num > 10:
+                line_bot_api.reply_message(event.reply_token, (
+                    TextSendMessage('お前オラに%d回も連続でスタンプ送って何がしてぇんだ!?' % stamp_num),
+                    TextSendMessage('馬鹿なことしてねえで乱数って言え!!!')
+                ))
+            else:
+                cur.execute("DELETE FROM FlagTB WHERE userID='%s';" % user_id)
+                line_bot_api.reply_message(event.reply_token, (
+                    TextSendMessage('いいスタンプだなぁ'),
+                    TextSendMessage('ところで"乱数"って言ってみねぇか？')
+                ))
     else:
-        stamp_num = result[0][6]
-        stamp_num += 1
-        cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
-        if stamp_num > 10:
-            line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('お前オラに%d回も連続でスタンプ送って何がしてぇんだ!?' % stamp_num),
-                TextSendMessage('馬鹿なことしてねえで乱数って言え!!!')
-            ))
-        else:
-            cur.execute("DELETE FROM FlagTB WHERE userID='%s';" % user_id)
-            line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('いいスタンプだなぁ'),
-                TextSendMessage('ところで"乱数"って言ってみねぇか？')
-            ))
+        # データベースの中にないユーザーは追加する
+        cur.execute("INSERT INTO FlagTB VALUES ('%s',FALSE,FALSE,FALSE,-1,-1,1);" % user_id)
+        line_bot_api.reply_message(event.reply_token, (
+            TextSendMessage('いいスタンプだなぁ'),
+            TextSendMessage('ところで"乱数"って言ってみねぇか？zero')
+        ))
 
 
 if __name__ == "__main__":

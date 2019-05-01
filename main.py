@@ -161,8 +161,8 @@ def handle_sticker(event):
         cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
         if stamp_num > 10:
             line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('最小値を言わずに%d回もスタンプ送りやがって...' % stamp_num),
-                TextSendMessage('早く最小値を教えねぇか!!!')
+                TextSendMessage('最大値を言わずに%d回もスタンプ送りやがって...' % stamp_num),
+                TextSendMessage('早く最大値を教えねぇか!!!')
             ))
         else:
             line_bot_api.reply_message(event.reply_token, (

@@ -28,11 +28,6 @@ conn = psycopg2.connect(host=HOST, port=PORT, database=DATABASE, user=USER, pass
 cur = conn.cursor()
 
 
-# def get_connection():
-#     connection =  psycopg2.connect(host=HOST, port=PORT, database=DATABASE, user=USER, password=PASSWORD)
-#     return connection
-
-
 @app.route("/callback", methods=['POST'])
 def callback():
     # ヘッダのX-Line-Signatureを取得
@@ -55,12 +50,11 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     global cur
-     # with get_connection() as conn:
-     #     with conn.cursor() as cur:
     user_id = str(event.source.user_id)
     cur.execute("SELECT * FROM FlagTB WHERE userID='%s';" % user_id)
     result = cur.fetchall()
     if result:
+        # データベースに登録されているユーザーならここに入る
         if '乱数' in event.message.text or 'リセット' in event.message.text:
             if '乱数' in event.message.text and result[0][1]:
                 # min_flagがオンのとき
@@ -81,7 +75,7 @@ def handle_message(event):
                         TextSendMessage('最小値は何にすんだ?')
                     ))
             elif result[0][1]:
-                # min_flagがオンのとき
+                # min_flagがオンのときにリセット
                 cur.execute("UPDATE FlagTB SET minFlag=FALSE,maxFlag=FALSE,randFlag=FALSE,stampNum=0 WHERE userID='%s';" % user_id)
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -90,6 +84,7 @@ def handle_message(event):
                         TextSendMessage('乱数を作りたい時はまた呼んでくれ!')
                     ))
             else:
+                # なにもなしにリセット
                 cur.execute("UPDATE FlagTB SET minFlag=FALSE,maxFlag=FALSE,randFlag=FALSE,stampNum=0 WHERE userID='%s';" % user_id)
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -141,10 +136,27 @@ def handle_message(event):
                     event.reply_token,
                     TextSendMessage('ちょっと"乱数"って言ってみねぇか?'))
     else:
+        # データベースの中にないユーザーは追加する
         cur.execute("INSERT INTO FlagTB VALUES ('%s',FALSE,FALSE,FALSE,-1,-1,0);" % user_id)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage('ちょっと"乱数"って言ってみねぇか?zero'))
+        if '乱数' in event.message.text:
+            cur.execute("UPDATE FlagTB SET minFlag=TRUE,stampNum=0 WHERE userID='%s';" % user_id)
+            line_bot_api.reply_message(
+                event.reply_token,
+                (
+                    TextSendMessage('お、乱数の生成だな'),
+                    TextSendMessage('最小値は何にすんだ?')
+                ))
+        if 'リセット' in event.message.text:
+            line_bot_api.reply_message(
+                event.reply_token,
+                (
+                    TextSendMessage('リセットするのか'),
+                    TextSendMessage('ってまだ何も設定してねぇじゃねぇか!')
+                ))
+        else:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage('ちょっと"乱数"って言ってみねぇか?'))
 
 
 # スタンプが来たとき

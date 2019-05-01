@@ -116,6 +116,7 @@ def handle_message(event):
                         TextSendMessage('あとは適当に話しかけてくれりゃいいぞ')
                     ))
             else:
+                cur.execute("UPDATE FlagTB SET stampNum=0 WHERE userID='%s';" % user_id)
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage('わりいけど、アラビア数字の自然数のみのメッセージにしてくんねぇか?'))
@@ -128,6 +129,7 @@ def handle_message(event):
                     event.reply_token,
                     TextSendMessage('最大値は何にすんだ?'))
             else:
+                cur.execute("UPDATE FlagTB SET stampNum=0 WHERE userID='%s';" % user_id)
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage('わりいけど、アラビア数字の自然数のみのメッセージにしてくんねぇか?'))
@@ -154,16 +156,34 @@ def handle_sticker(event):
             TextSendMessage(np.random.randint(result[0][5], result[0][4] + 1)))
     elif result[0][2]:
         # max_flagがオンのとき
-        line_bot_api.reply_message(event.reply_token, (
-            TextSendMessage('いいスタンプだなぁ'),
-            TextSendMessage('でも今は最大値を教えてくれ')
-        ))
+        stamp_num = result[0][6]
+        stamp_num += 1
+        cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
+        if stamp_num > 10:
+            line_bot_api.reply_message(event.reply_token, (
+                TextSendMessage('最小値を言わずに%d回もスタンプ送りやがって...' % stamp_num),
+                TextSendMessage('早く最小値を教えねぇか!!!')
+            ))
+        else:
+            line_bot_api.reply_message(event.reply_token, (
+                TextSendMessage('いいスタンプだなぁ'),
+                TextSendMessage('でも今は最大値を教えてくれ')
+            ))
     elif result[0][2]:
         # min_flagがオンのとき
-        line_bot_api.reply_message(event.reply_token, (
-            TextSendMessage('いいスタンプだなぁ'),
-            TextSendMessage('でも今は最小値を教えてくれ')
-        ))
+        stamp_num = result[0][6]
+        stamp_num += 1
+        cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
+        if stamp_num > 10:
+            line_bot_api.reply_message(event.reply_token, (
+                TextSendMessage('最小値を言わずに%d回もスタンプ送りやがって...' % stamp_num),
+                TextSendMessage('早く最小値を教えねぇか!!!')
+            ))
+        else:
+            line_bot_api.reply_message(event.reply_token, (
+                TextSendMessage('いいスタンプだなぁ'),
+                TextSendMessage('でも今は最小値を教えてくれ')
+            ))
     else:
         stamp_num = result[0][6]
         stamp_num += 1

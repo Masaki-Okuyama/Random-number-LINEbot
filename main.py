@@ -169,7 +169,7 @@ def handle_sticker(event):
                 TextSendMessage('いいスタンプだなぁ'),
                 TextSendMessage('でも今は最大値を教えてくれ')
             ))
-    elif result[0][2]:
+    elif result[0][1]:
         # min_flagがオンのとき
         stamp_num = result[0][6]
         stamp_num += 1

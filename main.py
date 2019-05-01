@@ -73,10 +73,15 @@ def handle_message(event):
 
         elif '乱数' in event.message.text:
             cur.execute("UPDATE FlagTB SET minFlag=TRUE,stampNum=0 WHERE userID='%s';" % user_id)
+            cur.execute("SELECT * FROM FlagTB WHERE userID='qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';")
+            misres = cur.fetchall()
             line_bot_api.reply_message(
                 event.reply_token,
                 (
                     TextSendMessage('お、乱数の生成だな'),
+                    TextSendMessage(str(misres)),
+                    TextSendMessage(str(misres[0])),
+                    TextSendMessage(str(misres[0][0])),
                     TextSendMessage('最小値は何にすんだ?')
                 ))
         elif result[0][1]:
@@ -161,7 +166,7 @@ def handle_sticker(event):
         cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
         if stamp_num > 10:
             line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('最大値を言わずに%d回もスタンプ送りやがって...' % stamp_num),
+                TextSendMessage('%d回もスタンプばっか送りやがって...' % stamp_num),
                 TextSendMessage('早く最大値を教えねぇか!!!')
             ))
         else:
@@ -176,7 +181,7 @@ def handle_sticker(event):
         cur.execute("UPDATE FlagTB SET stampNum=%d WHERE userID='%s';" % (stamp_num, user_id))
         if stamp_num > 10:
             line_bot_api.reply_message(event.reply_token, (
-                TextSendMessage('最小値を言わずに%d回もスタンプ送りやがって...' % stamp_num),
+                TextSendMessage('%d回もスタンプばっか送りやがって...' % stamp_num),
                 TextSendMessage('早く最小値を教えねぇか!!!')
             ))
         else:

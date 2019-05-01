@@ -147,7 +147,7 @@ def handle_message(event):
                 event.reply_token,
                 (
                     TextSendMessage('お、乱数の生成だな'),
-                    TextSendMessage('最小値は何にすんだ?zero')
+                    TextSendMessage('最小値は何にすんだ?')
                 ))
         if 'リセット' in event.message.text:
             cur.execute("INSERT INTO FlagTB VALUES ('%s',FALSE,FALSE,FALSE,-1,-1,0);" % user_id)
@@ -155,13 +155,13 @@ def handle_message(event):
                 event.reply_token,
                 (
                     TextSendMessage('リセットするのか'),
-                    TextSendMessage('ってまだ何も設定してねぇじゃねぇか!zero')
+                    TextSendMessage('ってまだ何も設定してねぇじゃねぇか!')
                 ))
         else:
             cur.execute("INSERT INTO FlagTB VALUES ('%s',FALSE,FALSE,FALSE,-1,-1,0);" % user_id)
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage('ちょっと"乱数"って言ってみねぇか?zero'))
+                TextSendMessage('ちょっと"乱数"って言ってみねぇか?'))
 
 
 # スタンプが来たとき
@@ -219,7 +219,6 @@ def handle_sticker(event):
                     TextSendMessage('馬鹿なことしてねえで乱数って言え!!!')
                 ))
             else:
-                cur.execute("DELETE FROM FlagTB WHERE userID='%s';" % user_id)
                 line_bot_api.reply_message(event.reply_token, (
                     TextSendMessage('いいスタンプだなぁ'),
                     TextSendMessage('ところで"乱数"って言ってみねぇか？')
@@ -229,7 +228,7 @@ def handle_sticker(event):
         cur.execute("INSERT INTO FlagTB VALUES ('%s',FALSE,FALSE,FALSE,-1,-1,1);" % user_id)
         line_bot_api.reply_message(event.reply_token, (
             TextSendMessage('いいスタンプだなぁ'),
-            TextSendMessage('ところで"乱数"って言ってみねぇか？zero')
+            TextSendMessage('ところで"乱数"って言ってみねぇか？')
         ))
 
 

@@ -2,3 +2,4 @@ Flask==1.0.2
 line-bot-sdk==1.8.0
 psycopg2==2.8.2
 numpy==1.16.3
+google-cloud-vision==2.0.0

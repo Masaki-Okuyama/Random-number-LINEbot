@@ -21,8 +21,6 @@ FlagTB (
 );
 ```
 
-## portpass.py
-データベースに繋げる情報はportpass.pyに書き、importしています。
 
 ## 乱数生成くんのLINEID
 IDは`@yij5612k`  
